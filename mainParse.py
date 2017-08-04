@@ -18,6 +18,12 @@ def getHTML(url):
 	body=BeautifulSoup(data, 'lxml')
 	return(body)
 
+def openFile(path):
+	if not(os.path.exists(path)):
+		return(open(path, 'w'))
+	else:
+		return(open(path, 'a'))
+
 shopTypes=['0201', '0202']
 #тут менять параметр после категории для перехода по магазинам/конбини
 #выдирать значения можно непосредственно из селектов
@@ -29,18 +35,21 @@ for shopType in shopTypes:
 	shops=body.find('select', {'id':'detail_category_id_select'}).findChildren('option')
 	for shop in shops:
 		if((shop['value']!="") and (shop['value']!="%s001003"%shopType)):
+			shopTypeFile=openFile('txt_files/shops.txt')
+			shopTypeFile.write('%s\n%s\n'%(shop['value'].encode('utf-8'), shop.text.encode('utf-8')))
+			shopTypeFile.close()
 			body=getHTML('https://www.navitime.co.jp/category/%s'%shop['value'])
 			selectPref=body.find('select', {'id':'prefecture_select'})
 			prefList=selectPref.findChildren('option')
 			for prefecture in prefList:
 				#сейчас только Токио, поэтому только 13
 				if(prefecture['value']=="13"):
-					fPath='txt_files/%s.txt'%prefecture.text
-					
-					if not(os.path.exists(fPath)):
-						file=open(fPath, 'w')
-					else:
-						file=open(fPath, 'a')
+					#fPath='txt_files/%s.txt'%prefecture.text
+					#if not(os.path.exists(fPath)):
+					#	file=open(fPath, 'w')
+					#else:
+					#	file=open(fPath, 'a')
+					file=openFile('txt_files/%s.txt'%prefecture.text)
 					html=requests.get('https://www.navitime.co.jp/async/category/addressList?addressCode=%s'%prefecture['value'])
 					js=json.loads(html.text)
 					for code in js:
