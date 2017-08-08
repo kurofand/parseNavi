@@ -11,7 +11,7 @@ import os.path
 def getHTML(url):
 	try:
 		html=requests.get(url)
-	except requests.eceptions.ConnectionError:
+	except requests.exceptions.ConnectionError:
 		time.sleep(300)
 		html=requests.get(url)
 	data=html.text
